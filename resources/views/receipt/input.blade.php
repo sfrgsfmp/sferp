@@ -1,9 +1,9 @@
 @extends('menu.mainmenu')
-@section('title','Receipt ')
+@section('title','Receipt Log ')
 
 @section('section_title')
 <div class="col-lg-10">
-    <h2>@yield('content_title','Receipt')</h2>
+    <h2>@yield('content_title','Receipt Log')</h2>
     <ol class="breadcrumb">
         <li class="breadcrumb-item">
             <a href="{{ route('home') }}">Home</a>
@@ -32,7 +32,8 @@
                 <li> <a class="nav-link {{ request()->is('receipt/graderin') ? 'active' : null }}" href="{{ url('receipt/graderin') }}">Grader-In</a> </li>
                 <li> <a class="nav-link {{ request()->is('receipt/document') ? 'active' : null }}" href="{{ url('receipt/document') }}">Document</a> </li>
                 <li> <a class="nav-link {{ request()->is('receipt/external') ? 'active' : null }}" href="{{ url('receipt/external') }}">External</a></li>
-                <li> <a class="nav-link {{ request()->is('receipt/invoicing') ? 'active' : null }}" href="{{ url('receipt/invoicing') }}">Invoicing by Parcel </a></li>
+                <li> <a class="nav-link {{ request()->is('receipt/invoicing') ? 'active' : null }}" href="{{ url('receipt/invoicing') }}">Invoicing</a></li>
+                <!-- <li> <a class="nav-link {{ request()->is('receipt/invoicing_parcel') ? 'active' : null }}" href="{{ url('receipt/invoicing_parcel') }}">Invoicing Parcel</a></li> -->
             </ul>
             <div class="tab-content">
                 <div id="{{ url('receipt') }}" class="tab-pane {{ request()->is('receipt') ? 'active' : null }}">
@@ -46,19 +47,23 @@
                                         <div class="col-sm-9">
                                             <div class="input-group">
 
-                                                <input type="hidden" class="form-control-sm form-control" id="tt_id" name="tt_id" readonly>
+                                                <input type="text" class="form-control-sm form-control" id="tt_id" name="ttid" readonly>
+                                                
 
-                                                <input type="text" class="form-control-sm form-control" id="tt_code" name="tt_code" readonly>
-
+                                                <input type="text" class="form-control-sm form-control @error('tt_id') is-invalid @enderror" id="tt_code" name="tt_id" readonly>
+                                                
+                                                
                                                 <span class="input-group-btn">
-                                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal5"> <i class="fa fa-search" id="window"> </i> </button>
+                                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal2"> <i class="fa fa-search" id="window"> </i> </button>
                                                 </span>
+                                                @error('tt_id')
+                                                    <span class="invalid-feedback" role="alert">
+                                                        <strong>{{ $message }}</strong>
+                                                    </span>
+                                                @enderror
                                             </div>
-                                            @error('tt_code')
-                                                <span class="invalid-feedback" role="alert">
-                                                    <strong>{{ $message }}</strong>
-                                                </span>
-                                            @enderror
+                                                
+                                           
                                         </div>
                                     </div>
                                     <div class="form-group row">
@@ -636,15 +641,13 @@
 
                     <div class="panel-body">
                         <label class="col-sm-2 col-form-label"> <b> List General </b> </label>
-                            
-                            
                             <div class="table-responsive">
                                 <table id="example" class="footable table-bordered toggle-arrow-tiny dataTables-example">
                                     <thead>
                                         <tr>
                                             <th data-toggle="true"> Number</th>
                                             <th> Apply Date</th>
-
+                                            <th> TT</th>
                                             <th> PIM</th>
                                             <th> PIM No </th>
                                             <th> Parcel </th>
@@ -681,7 +684,7 @@
                                         <tr>
                                             <td> {{ $r->code}}</td>
                                             <td> {{ $r->applydate }}</td>
-
+                                            <td> {{ implode(',', $r->tts()->get()->pluck('code_tt')->toArray()) }}</td>
                                             <td> {{ implode(',', $r->pims()->get()->pluck('code_pim')->toArray()) }} </td>
                                             <td> {{ implode(',', $r->pims()->get()->pluck('pimno')->toArray()) }} </td>
                                             <td> {{ implode(',', $r->pims()->get()->pluck('noparcel')->toArray()) }}</td>
@@ -719,7 +722,10 @@
                                                     <i class="fa fa-edit"> </i>
                                                 </a>
                                                 &nbsp
-                                                <a class="float-center" title="View" id="viewGeneral" data-id="{{$r->id}}"> <i class="fa fa-laptop"> </i></a>
+                                                <button type="button" id="viewGeneral" class="btn btn-outline btn-link float-center" onclick="viewGeneral({{$r->id}})" title="View">
+                                                    <i class="fa fa-laptop"> </i>
+                                                </button>
+                                                
                                             </td>
                                         </tr>
                                         @endforeach
@@ -1709,6 +1715,122 @@
 
                     </form>
                 </div>
+
+                <!-- <div id="{{ url('receipt/invoicing_parcel') }}" class="tab-pane {{ request()->is('receipt/invoicing_parcel') ? 'active' : null }}">
+                    <div class="panel-body">
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label">No Receipt Log </label>
+                            <div class="col-sm-9">
+                                <div class="input-group">
+                                
+                                    <select class="chosen-select form-control" multiple id="code_receipt7">
+                                        @foreach($receipts as $rc)
+                                            <option value="{{$rc->id}}"> {{$rc->code}}. Parcel : {{$rc->noparcel}}. Sortimen : {{ $rc->sortimen}}. PIM : {{ $rc->code_pim}}. TT : {{ $rc->code_tt}}. Document : {{ $rc->no_document}}</option>
+                                        @endforeach
+                                    </select>
+                                    
+                                </div>  
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary btn-sm btn-outline" type="button" id="idreceipts"> Done </button>
+                        
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label"> </label>
+                            <div class="col-sm-6">
+                                <div class="input-group"> 
+                                    //PRICING PO 
+                                    <button class="btn btn-primary btn-xs btn-outline" type="button" id="generate_pricing2" name="generate_pricing2">Generate Pricing</button>
+
+                                     //INVOICING
+                                    <button class="btn btn-primary btn-xs ml-1 btn-outline" type="button" id="generate_invoicing2">Generate Invoicing</button>
+                                </div>
+                            </div>
+                            
+                            <span id="notif_invoicing"></span>
+                            <label class="col-sm-1 col-form-label">Report </label>
+                            <div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-primary btn-xs" id="report_invoicing"> Invoicing Receipt</button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>  -->
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- //MODAL SEARCH TT -->
+<div class="modal inmodal fade" id="myModal2" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">TT</h4>
+                <small class="font-bold">Tanda Terima</small>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="footable table-bordered toggle-arrow-tiny dataTables-example">
+                        <thead>
+                            <tr>
+                                <th data-toggle="true"> Apply Date </th>
+                                
+                                <th>TT</th>
+                                <th>No TT</th>
+                                <th>No Form TT</th>
+                                <th>PIM</th>
+                                <th>No PIM</th>
+                                <th data-hide="all"> No Document</th>
+                                <th data-hide="all"> No Dok Asal</th>
+                                <th> PO</th>
+                                <th> Spesies</th>
+                                <th> Sortimen</th>
+                                <th> No Parcel</th>
+                                <th> Vendor</th>
+                                
+                                <th> Select <i class="fa fa-check-square-o"> </i></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($tt as $t)
+                            <tr>
+                                
+                                <td> {{ $t->tt_date }} </td>
+                                <td> {{ $t->code_tt }} </td>
+                                <td> {{ $t->tt_no }} </td>
+                                <td> {{ $t->form_no }} </td>
+                                <td> {{ $t->code_pim}} </td>
+                                <td> {{ $t->pimno }}</td>
+                                <td> {{ $t->no_document }} </td>
+                                <td> {{ $t->no_dokumen }} </td>
+                                <td> {{ $t->code}}</td>
+                                <td> {{ $t->speciesname}}</td>
+                                <td> {{ $t->sortimen}}</td>
+                                <td> {{ $t->noparcel}}</td>
+                                <td> {{ $t->name_vendor}} {{$t->name_tpk}}</td>
+
+                                <td align=center> 
+                                    
+                                    <button type="button" id="select_tt" class="btn btn-outline btn-link" data-id="{{ $t->tt_id}}" onclick="selecttt({{$t->tt_id}})" value="{{ $t->tt_id}}" title="Choose">
+                                        <i class="fa fa-square-o"> </i>
+                                    </button>
+                                    
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                
             </div>
         </div>
     </div>
@@ -1781,6 +1903,8 @@
     </div>
 </div>
 
+
+
 <!-- //MODAL SEARCH NO-RECEIPT LOG -->
 <div class="modal inmodal fade" id="myModal1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -1843,6 +1967,28 @@
 </div>
 
 
+
+<script>
+    $(document).ready(function(){
+        $('#idreceipts').click(function(){
+            res = $('#code_receipt7').val();
+            console.log(res);
+        });
+
+        $('#generate_invoicing2').click(function(){
+            
+            var hasil = $('#code_receipt7').val();
+            // console.log(hasil);
+            window.location = '/receipt/generate_invoicing2/'+hasil;
+            
+        })
+
+        
+
+    });
+
+</script>
+
 <script>
     $(document).ready(function(){
         $('#report_invoicing').click(function(e){
@@ -1870,103 +2016,7 @@
     })
 
 </script>
-<script>
-    $(document).ready(function(){
-        $('#viewGeneral').click(function(e){
-            e.preventDefault();
-            var id = $(this).data('id');
-            if(id)
-            {
-                console.log('id = '+id);
 
-                $.ajax({
-                    url: '/receipt/viewGeneral/'+id,
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function(data){
-                        console.log(data);
-                        $('#tt_code').val(data[0]);
-                        $('#codepim').val(data[1]);
-                        $('#nopim').val(data[2]);
-                        $('#status').val(data[3]);
-                        $('#itemgroup_id').val(data[4]);
-                        $('#division').val(data[5]);
-                        $('#applydate').val(data[6]);
-
-                       
-                        $('#from_warehouse').empty();
-                        $('#from_warehouse').append('<option value=""> '+data[7]+' </option>');
-                        $("#from_warehouse").trigger("chosen:updated");
-
-                        $('#to_warehouse').empty();
-                        $('#to_warehouse').append('<option value=""> '+data[8]+' </option>');
-                        $("#to_warehouse").trigger("chosen:updated");
-
-                        $('#objective').empty();
-                        $('#objective').append('<option value=""> '+data[9]+' </option>');
-                        $("#objective").trigger("chosen:updated");
-
-                        $('#ppc').val(data[10]);
-                        
-                       
-                        $('#remarks').empty();
-                        $('#remarks').append('<option value=""> '+data[11]+' </option>');
-                        $("#remarks").trigger("chosen:updated");
-                       
-
-                        $('#po').val(data[12]);
-                        $('#procurement').val(data[13]);
-                        $('#code_vendor').val(data[14]);
-                        $('#vendor').val(data[15]);
-                        $('#concession').val(data[16]);
-                        $('#code_beneficiary').val(data[17]);
-                        $('#name_beneficiary').val(data[18]);
-                        $('#address_beneficiary').val(data[19]);
-                        $('#province_beneficiary').val(data[20]);
-                        $('#city_beneficiary').val(data[21]);
-                        $('#species').val(data[22]);
-                        $('#skskb_no').val(data[23]);
-                        $('#skskb_qty').val(data[24]);
-                        $('#skskb_m3').val(data[25]);
-                        $('#parcel').val(data[26]);
-                        $('#certificate').val(data[27]);
-                        $('#perni').val(data[28]);
-                        $('#fakb').val(data[29]);
-                        $('#measurement').val(data[30]);
-                        $('#tt_no').val(data[31]);
-                        $('#transport_no').val(data[32]);
-                        $('#document').val(data[33]);
-                        
-                        $('#unitsize').empty();
-                        $('#unitsize').append('<option value=""> '+data[34]+' </option>');
-                        $("#unitsize").trigger("chosen:updated");
-
-                        $('#unitprice').empty();
-                        $('#unitprice').append('<option value=""> '+data[35]+' </option>');
-                        $("#unitprice").trigger("chosen:updated");
-
-
-                        $('#npwp').val(data[36]);
-                        $('#incoterms').val(data[37]);
-                        $('#source_price').val(data[38]);
-
-                        $('#pph23').val(data[39]);
-                        $('#pph22').val(data[40]);
-                        $('#pph21').val(data[41]);
-                        $('#ppn').val(data[42]);
-                        $('#trucking').val(data[43]);
-                        $('#administration').val(data[44]);
-                        $('#lainlain').val(data[45]);
-                        $('#unit_trucking').val(data[46]);
-                    }
-                });
-
-                $('html, body').animate({
-                    scrollTop: $("#topgeneral").offset().top}, 2000);
-            }
-        })
-    })
-</script>
 
 <script>
     $(document).ready(function(){
@@ -2112,73 +2162,72 @@
     // GRADER IN
     $(document).ready(function(){
 
-    var count = 1;
+        var count = 1;
 
-    tblgraderin(count);
-
-    function tblgraderin(number)
-    {
-            html = '<tr>';
-            html += '<td><input type="text" name="graderin[]" class="form-control" /></td>';
-            html += '<td><input type="text" name="location_graderin[]" class="form-control" /></td>';
-           
-
-            if(number > 1)
-            {
-                html += '<td><button type="button" name="remove" id="" class="btn btn-danger btn-sm remove">Remove</button></td></tr>';
-                $('#bodygraderin').append(html);
-            }
-            else
-            {   
-                html += '<td><button type="button" name="add" id="add" class="btn btn-success btn-sm">Add</button></td></tr>';
-                $('#bodygraderin').html(html);
-            }
-
-            
-    }
-
-    $(document).on('click', '#add', function(){
-        count++;
         tblgraderin(count);
-    });
 
-    $(document).on('click', '.remove', function(){
-        count--;
-        $(this).closest("tr").remove();
-    });
-
-    $('#dynamicformgraderin').on('submit', function(event){
-            event.preventDefault();
-            $.ajax({
-                url:'{{ route("receipt.storegraderin") }}',
-                method:'post',
-                data:$(this).serialize(),
-                dataType:'json',
-                // beforeSend:function(){
-                //     $('#save').attr('disabled','disabled');
-                // },
-                success:function(data)
+        function tblgraderin(number)
+        {
+                html = '<tr>';
+                html += '<td><input type="text" name="graderin[]" class="form-control" /></td>';
+                html += '<td><input type="text" name="location_graderin[]" class="form-control" /></td>';
+            
+                if(number > 1)
                 {
-                    if(data.error)
-                    {
-                        var error_html = '';
-                        for(var count = 0; count < data.error.length; count++)
-                        {
-                            error_html += '<p>'+data.error[count]+'</p>';
-                        }
-                        
-                        $('#result').html('<div class="alert alert-danger">'+error_html+'</div>');
-                    }
-                    else
-                    {
-                        tblgraderin(1);
-                        $('#result').html('<div class="alert alert-success">'+data.success+'</div>');
-                        location.reload();
-                    }
-                    // $('#save').attr('disabled', false);
+                    html += '<td><button type="button" name="remove" id="" class="btn btn-danger btn-sm remove">Remove</button></td></tr>';
+                    $('#bodygraderin').append(html);
                 }
-            })
-    });
+                else
+                {   
+                    html += '<td><button type="button" name="add" id="add" class="btn btn-success btn-sm">Add</button></td></tr>';
+                    $('#bodygraderin').html(html);
+                }
+
+                
+        }
+
+        $(document).on('click', '#add', function(){
+            count++;
+            tblgraderin(count);
+        });
+
+        $(document).on('click', '.remove', function(){
+            count--;
+            $(this).closest("tr").remove();
+        });
+
+        $('#dynamicformgraderin').on('submit', function(event){
+                event.preventDefault();
+                $.ajax({
+                    url:'{{ route("receipt.storegraderin") }}',
+                    method:'post',
+                    data:$(this).serialize(),
+                    dataType:'json',
+                    // beforeSend:function(){
+                    //     $('#save').attr('disabled','disabled');
+                    // },
+                    success:function(data)
+                    {
+                        if(data.error)
+                        {
+                            var error_html = '';
+                            for(var count = 0; count < data.error.length; count++)
+                            {
+                                error_html += '<p>'+data.error[count]+'</p>';
+                            }
+                            
+                            $('#result').html('<div class="alert alert-danger">'+error_html+'</div>');
+                        }
+                        else
+                        {
+                            tblgraderin(1);
+                            $('#result').html('<div class="alert alert-success">'+data.success+'</div>');
+                            location.reload();
+                        }
+                        // $('#save').attr('disabled', false);
+                    }
+                })
+        });
 
     });
 </script>
@@ -2187,73 +2236,73 @@
     //GRADER OUT
     $(document).ready(function(){
 
-    var count = 1;
+        var count = 1;
 
-    tblgraderout(count);
-
-    function tblgraderout(number)
-    {
-            html = '<tr>';
-            html += '<td><input type="text" name="graderout[]" class="form-control" /></td>';
-            html += '<td><input type="text" name="location_graderout[]" class="form-control" /></td>';
-           
-
-            if(number > 1)
-            {
-                html += '<td><button type="button" name="remove" id="removegraderout" class="btn btn-danger btn-sm remove">Remove</button></td></tr>';
-                $('#bodygraderout').append(html);
-            }
-            else
-            {   
-                html += '<td><button type="button" name="add" id="addgraderout" class="btn btn-success btn-sm">Add</button></td></tr>';
-                $('#bodygraderout').html(html);
-            }
-
-            
-    }
-
-    $(document).on('click', '#addgraderout', function(){
-        count++;
         tblgraderout(count);
-    });
 
-    $(document).on('click', '#removegraderout', function(){
-        count--;
-        $(this).closest("tr").remove();
-    });
+        function tblgraderout(number)
+        {
+                html = '<tr>';
+                html += '<td><input type="text" name="graderout[]" class="form-control" /></td>';
+                html += '<td><input type="text" name="location_graderout[]" class="form-control" /></td>';
+            
 
-    $('#dynamicformgraderout').on('submit', function(event){
-            event.preventDefault();
-            $.ajax({
-                url:'{{ route("receipt.storegraderout") }}',
-                method:'post',
-                data:$(this).serialize(),
-                dataType:'json',
-                // beforeSend:function(){
-                //     $('#save').attr('disabled','disabled');
-                // },
-                success:function(data)
+                if(number > 1)
                 {
-                    if(data.error)
-                    {
-                        var error_html = '';
-                        for(var count = 0; count < data.error.length; count++)
-                        {
-                            error_html += '<p>'+data.error[count]+'</p>';
-                        }
-                        
-                        $('#result').html('<div class="alert alert-danger">'+error_html+'</div>');
-                    }
-                    else
-                    {
-                        tblgraderout(1);
-                        $('#result').html('<div class="alert alert-success">'+data.success+'</div>');
-                        location.reload();
-                    }
-                    // $('#save').attr('disabled', false);
+                    html += '<td><button type="button" name="remove" id="removegraderout" class="btn btn-danger btn-sm remove">Remove</button></td></tr>';
+                    $('#bodygraderout').append(html);
                 }
-            })
-    });
+                else
+                {   
+                    html += '<td><button type="button" name="add" id="addgraderout" class="btn btn-success btn-sm">Add</button></td></tr>';
+                    $('#bodygraderout').html(html);
+                }
+
+                
+        }
+
+        $(document).on('click', '#addgraderout', function(){
+            count++;
+            tblgraderout(count);
+        });
+
+        $(document).on('click', '#removegraderout', function(){
+            count--;
+            $(this).closest("tr").remove();
+        });
+
+        $('#dynamicformgraderout').on('submit', function(event){
+                event.preventDefault();
+                $.ajax({
+                    url:'{{ route("receipt.storegraderout") }}',
+                    method:'post',
+                    data:$(this).serialize(),
+                    dataType:'json',
+                    // beforeSend:function(){
+                    //     $('#save').attr('disabled','disabled');
+                    // },
+                    success:function(data)
+                    {
+                        if(data.error)
+                        {
+                            var error_html = '';
+                            for(var count = 0; count < data.error.length; count++)
+                            {
+                                error_html += '<p>'+data.error[count]+'</p>';
+                            }
+                            
+                            $('#result').html('<div class="alert alert-danger">'+error_html+'</div>');
+                        }
+                        else
+                        {
+                            tblgraderout(1);
+                            $('#result').html('<div class="alert alert-success">'+data.success+'</div>');
+                            location.reload();
+                        }
+                        // $('#save').attr('disabled', false);
+                    }
+                })
+        });
 
     });
 </script>
@@ -2261,44 +2310,44 @@
 <script>
     $(document).ready(function () {
 
-    $('.demo2').click(function (e)
-    {
-        e.preventDefault();
-        var id = $(this).data('id');
-        console.log(id);
-        swal(
+        $('.demo2').click(function (e)
         {
-            title: "Are you sure want to delete this?",
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#DD6B55",
-            confirmButtonText: "Yes, delete it!",
-            cancelButtonText: "No, cancel!",
-            },
-                function (isConfirm)
-                {
-                    if (isConfirm)
+            e.preventDefault();
+            var id = $(this).data('id');
+            console.log(id);
+            swal(
+            {
+                title: "Are you sure want to delete this?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Yes, delete it!",
+                cancelButtonText: "No, cancel!",
+                },
+                    function (isConfirm)
                     {
-                        $.ajax({
-                            type : "GET",
-                            url : "{{ url('receipt/grader')}}" + '/' + id,
-                            data : {id:id},
-                            // dataType: 'json',
-                            success: function (data)
-                            {
-                                swal("Done!", "Your data has been delete.", "success");
-                                location.reload();
-                            }      
-                        });
+                        if (isConfirm)
+                        {
+                            $.ajax({
+                                type : "GET",
+                                url : "{{ url('receipt/grader')}}" + '/' + id,
+                                data : {id:id},
+                                // dataType: 'json',
+                                success: function (data)
+                                {
+                                    swal("Done!", "Your data has been delete.", "success");
+                                    location.reload();
+                                }      
+                            });
+                        }
+                        else
+                        {
+                            swal("Cancelled", "Your data is safe :)", "error");
+                        
+                        }
                     }
-                    else
-                    {
-                        swal("Cancelled", "Your data is safe :)", "error");
-                    
-                    }
-                }
-            );
-    });
+                );
+        });
     });
 </script>
 
@@ -2318,22 +2367,126 @@
 </script>
 
 <script>
-    
-    //select PIM
-    $(document).ready(function(){
-        $('.selectpim').click(function(e){
-            e.preventDefault();
-            var id = $(this).data('id');
-            if(id)
-            {
-                console.log('id = '+id);
 
-                $.ajax({
-                    url: '/receipt/selectpim/'+id,
+    function viewGeneral($id)
+    {
+        // alert($id)
+        if($id)
+        {
+            $.ajax({
+                    url: '/receipt/viewGeneral/'+$id,
                     type: 'GET',
                     dataType: 'json',
                     success: function(data){
                         console.log(data);
+                        $('#tt_code').val(data[0]);
+                        $('#codepim').val(data[1]);
+                        $('#nopim').val(data[2]);
+                        $('#status').val(data[3]);
+                        $('#itemgroup_id').val(data[4]);
+                        $('#division').val(data[5]);
+                        $('#applydate').val(data[6]);
+
+                       
+                        $('#from_warehouse').empty();
+                        $('#from_warehouse').append('<option value=""> '+data[7]+' </option>');
+                        $("#from_warehouse").trigger("chosen:updated");
+
+                        $('#to_warehouse').empty();
+                        $('#to_warehouse').append('<option value=""> '+data[8]+' </option>');
+                        $("#to_warehouse").trigger("chosen:updated");
+
+                        $('#objective').empty();
+                        $('#objective').append('<option value=""> '+data[9]+' </option>');
+                        $("#objective").trigger("chosen:updated");
+
+                        $('#ppc').val(data[10]);
+                        
+                       
+                        $('#remarks').empty();
+                        $('#remarks').append('<option value=""> '+data[11]+' </option>');
+                        $("#remarks").trigger("chosen:updated");
+                       
+
+                        $('#po').val(data[12]);
+                        $('#procurement').val(data[13]);
+                        $('#code_vendor').val(data[14]);
+                        $('#vendor').val(data[15]);
+                        $('#concession').val(data[16]);
+                        $('#code_beneficiary').val(data[17]);
+                        $('#name_beneficiary').val(data[18]);
+                        $('#address_beneficiary').val(data[19]);
+                        $('#province_beneficiary').val(data[20]);
+                        $('#city_beneficiary').val(data[21]);
+                        $('#species').val(data[22]);
+                        $('#skskb_no').val(data[23]);
+                        $('#skskb_qty').val(data[24]);
+                        $('#skskb_m3').val(data[25]);
+                        $('#parcel').val(data[26]);
+                        $('#certificate').val(data[27]);
+                        $('#perni').val(data[28]);
+                        $('#fakb').val(data[29]);
+                        $('#measurement').val(data[30]);
+                        $('#tt_no').val(data[31]);
+                        $('#transport_no').val(data[32]);
+                        $('#document').val(data[33]);
+                        
+                        $('#unitsize').empty();
+                        $('#unitsize').append('<option value=""> '+data[34]+' </option>');
+                        $("#unitsize").trigger("chosen:updated");
+
+                        $('#unitprice').empty();
+                        $('#unitprice').append('<option value=""> '+data[35]+' </option>');
+                        $("#unitprice").trigger("chosen:updated");
+
+
+                        $('#npwp').val(data[36]);
+                        $('#incoterms').val(data[37]);
+                        $('#source_price').val(data[38]);
+
+                        $('#pph23').empty();
+                        $('#pph23').append('<option value=""> '+data[39]+' </option>');
+                        $("#pph23").trigger("chosen:updated");
+
+                        $('#pph22').empty();
+                        $('#pph22').append('<option value=""> '+data[40]+' </option>');
+                        $("#pph22").trigger("chosen:updated");
+
+                        $('#pph21').empty();
+                        $('#pph21').append('<option value=""> '+data[41]+' </option>');
+                        $("#pph21").trigger("chosen:updated");
+
+                        $('#ppn').empty();
+                        $('#ppn').append('<option value=""> '+data[42]+' </option>');
+                        $("#ppn").trigger("chosen:updated");
+
+                        $('#trucking').val(data[43]);
+                        $('#administration').val(data[44]);
+                        $('#lainlain').val(data[45]);
+                        $('#unit_trucking').empty();
+                        $('#unit_trucking').append('<option value=""> '+data[46]+' </option>');
+                        $("#unit_trucking").trigger("chosen:updated");
+                    }
+                });
+
+                $('html, body').animate({
+                    scrollTop: $("#topgeneral").offset().top}, 2000);
+        }
+    }
+
+    function selecttt($tt_id)
+    {
+            if($tt_id)
+            {
+                console.log('id tt = '+$tt_id);
+                
+                $.ajax({
+                    url: '/receipt/select_tt/'+$tt_id,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data){
+                        console.log(data);
+                        
                         $('#tt_id').val(data[0]);
                         $('#tt_code').val(data[1]);
                         $('#pimid').val(data[2]);
@@ -2362,12 +2515,11 @@
                         $('#certificate').val(data[25]);
 
                         
-                        $('#myModal5').modal('hide');
+                        $('#myModal2').modal('hide');
                     }
                 })
             }
-        })
-    })
+    }
 </script>
 
 <script>
@@ -2391,7 +2543,11 @@
                         $('#code_receipt3').val(data[0]); //garader in
                         $('#code_receipt4').val(data[0]); //document
                         $('#code_receipt5').val(data[0]); //external rececipt
-                        $('#code_receipt6').val(data[0]); //invoicing by parcel
+                        $('#code_receipt6').val(data[0]); //invoicing
+                        
+                        
+                        
+                        
                         $('#generate_itemcode').val(data[1]); //view external receipt
                         $('#generate_pricing').val(data[1]); //invoicing pricing
                         $('#generate_invoicing').val(data[1]); //invoicing
@@ -2406,6 +2562,9 @@
                         
                         $('#report_invoicing').val(data[1]); //reporting invoicing
                         $('#report_external').val(data[1]); //reporting external
+
+                        $('#no_receipts').val(data[1]); //invoicingparcel
+
                         $('#myModal1').modal('hide');
                     }
                 })

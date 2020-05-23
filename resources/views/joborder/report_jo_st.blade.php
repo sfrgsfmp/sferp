@@ -80,7 +80,7 @@
     <tr>
         <td align=center> {{ $jj->name_vendor}} {{ $jj->name_tpk }}</td>
         <td align=center> {{ $jj->noparcel}}</td>
-        <td align=center> </td>
+        <td align=center> {{ $jj->objective_name}}</td>
         <td align=center> {{ $jj->speciesname}}</td>
         <td align=center> {{ $jj->sortimen}} </td>
         <td align=center> {{ $jj->cert_code}}</td>
@@ -141,7 +141,7 @@ Instruksi Kerja
         <td></td>
         <td></td>
         <td>{{$jj->tuk}}</td>
-        <td align=center>{{$jj->whgrade}}</td>
+        <td align=center>{{$jj->whgrader}}</td>
         <td align=center>{{$jj->whsimpan}}</td>
         <td align=center>{{$jj->whtahan}}</td>
     </tr>

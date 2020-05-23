@@ -28,6 +28,7 @@ Route::get('/admin', function(){
 
 Route::namespace('Admin')->prefix('admin')->middleware(['auth', 'auth.admin'])->name('admin.')->group(function(){
     Route::resource('/users', 'UserController');
+    Route::get('/users/destroy/{id}', 'UserController@destroy')->name('users.destroy');
     Route::get('/users/profile/{id}', 'UserController@edit')->name('users.profile');
     Route::get('/users/password/{id}', 'UserController@edit')->name('users.password');
     Route::resource('/changepswd', 'ChangeUserPswdController');
@@ -338,15 +339,18 @@ Route::prefix('receipt')->name('receipt.')->group(function ()
     Route::get('/document', 'ReceiptController@create')->name('create');
     Route::get('/external', 'ReceiptController@create')->name('create');
     Route::get('/invoicing', 'ReceiptController@create')->name('create');
+    Route::get('/invoicing_parcel', 'ReceiptController@create')->name('create');
 
 
     Route::get('/', 'ReceiptController@create')->name('create');
-    // Route::get('/selecttt/{id}', 'ReceiptController@selecttt');
-    Route::get('/selectpim/{id}', 'ReceiptController@selectpim');
+    Route::get('/select_tt/{id}', 'ReceiptController@select_tt')->name('select_tt');
+    Route::get('/selectpim/{id}', 'ReceiptController@selectpim')->name('selectpim');
     Route::get('/select_receiptlog/{id}', 'ReceiptController@select_receiptlog');
     Route::get('/viewGeneral/{id}', 'ReceiptController@viewGeneral');
     Route::get('/generate_pricing/{id}', 'ReceiptController@generate_pricing');
     Route::get('/generate_invoicing/{id}', 'ReceiptController@generate_invoicing');
+    Route::get('/generate_invoicing2/{id}', 'ReceiptController@generate_invoicing2');
+    
     Route::get('/export_vendorreceipt/{id}', 'ReceiptController@export_vendorreceipt');
     Route::post('/import', 'ReceiptController@import')->name('import');
 
@@ -373,7 +377,84 @@ Route::prefix('receipt')->name('receipt.')->group(function ()
     Route::get('/report_invoicing/{id}', 'ReceiptController@report_invoicing')->name('report_invoicing');
     Route::get('/report_external/{id}', 'ReceiptController@report_external')->name('report_external');
    
+
+    //RECEIPT HPH
+    Route::get('/hph', 'ReceiptHPHController@index')->name('hph');
+    Route::get('/hph/info', 'ReceiptHPHController@index')->name('hph.info');
+    Route::get('/hph/graderout', 'ReceiptHPHController@index')->name('hph.graderout');
+    Route::get('/hph/graderin', 'ReceiptHPHController@index')->name('hph.graderin');
+    Route::get('/hph/vendor', 'ReceiptHPHController@index')->name('hph.vendor');
+    Route::get('/hph/document', 'ReceiptHPHController@index')->name('hph.document');
+    Route::get('/hph/external', 'ReceiptHPHController@index')->name('hph.external');
+    Route::get('/hph/invoicing', 'ReceiptHPHController@index')->name('hph.invoicing');
+
+    Route::get('/hph/select_pim/{id}', 'ReceiptHPHController@select_pim');
+    Route::get('/hph/view_tt/{id}', 'ReceiptHPHController@view_tt')->name('hph.view_tt');
+    Route::get('/hph/get_ttid/{id}', 'ReceiptHPHController@get_ttid');
+    Route::get('/hph/select_hph/{id}', 'ReceiptHPHController@select_hph');
+    Route::post('/hph/store', 'ReceiptHPHController@store')->name('hph.store');
+    Route::post('/hph/storegraderin', 'ReceiptHPHController@storegraderin')->name('hph.storegraderin');
+    Route::post('/hph/storegraderout', 'ReceiptHPHController@storegraderout')->name('hph.storegraderout');
+    Route::get('/hph/editgeneral/{id}', 'ReceiptHPHController@editgeneral')->name('hph.editgeneral');
+
+    Route::post('/hph/importvendor', 'ReceiptHPHController@import_vendor')->name('hph.importvendor');
+    Route::get('/hph/exportvendor/{id}', 'ReceiptHPHController@export_vendor');
+    Route::post('/hph/importgraderout', 'ReceiptHPHController@import_graderout')->name('hph.importgraderout');
+    Route::get('/hph/exportgraderout/{id}', 'ReceiptHPHController@export_graderout');
+    Route::post('/hph/importgraderin', 'ReceiptHPHController@import_graderin')->name('hph.importgraderin');
+    Route::get('/hph/exportgraderin/{id}', 'ReceiptHPHController@export_graderin');
+    
+    Route::post('/hph/importdocument', 'ReceiptHPHController@import_document')->name('hph.importdocument');
+    Route::get('/hph/exportdocument/{id}', 'ReceiptHPHController@export_document');
+
+    Route::get('/hph/generate_itemcode/{id}', 'ReceiptHPHController@generate_itemcode');
+    Route::get('/hph/generate_pricing/{id}', 'ReceiptHPHController@generate_pricing');
+    Route::get('/hph/generate_invoicing/{id}', 'ReceiptHPHController@generate_invoicing');
+
+    Route::get('/hph/report_external/{id}', 'ReceiptHPHController@report_external');
+    Route::get('/hph/report_invoicing/{id}', 'ReceiptHPHController@report_invoicing');
+
+    //RECEIPT NON LOG
+    Route::get('/nonlog', 'ReceiptNonLogController@index')->name('nonlog');
+    Route::get('/nonlog/info', 'ReceiptNonLogController@index')->name('nonlog.info');
+    Route::get('/nonlog/vendor', 'ReceiptNonLogController@index')->name('nonlog.vendor');
+    Route::get('/nonlog/graderout', 'ReceiptNonLogController@index')->name('nonlog.graderout');
+    Route::get('/nonlog/graderin', 'ReceiptNonLogController@index')->name('nonlog.graderin');
+    Route::get('/nonlog/document', 'ReceiptNonLogController@index')->name('nonlog.document');
+    Route::get('/nonlog/external', 'ReceiptNonLogController@index')->name('nonlog.external');
+    Route::get('/nonlog/invoicing', 'ReceiptNonLogController@index')->name('nonlog.invoicing');
+
+    Route::get('/nonlog/graderin/{id}', 'ReceiptNonLogController@graderin')->name('nonlog.graderin');
+    Route::get('/nonlog/viewgraderin/{id}', 'ReceiptNonLogController@view_graderin')->name('nonlog.viewgraderin');
+
+    Route::post('/nonlog/importvendor', 'ReceiptNonLogController@import_vendor')->name('nonlog.importvendor');
+    Route::get('/nonlog/exportvendor/{id}', 'ReceiptNonLogController@export_vendor');
+    Route::post('/nonlog/importdocument', 'ReceiptNonLogController@import_document')->name('nonlog.importdocument');
+    Route::get('/nonlog/exportdocument/{id}', 'ReceiptNonLogController@export_document');
+
+    Route::post('/nonlog/store', 'ReceiptNonLogController@store')->name('nonlog.store');
+    Route::get('/nonlog/editgeneral/{id}', 'ReceiptNonLogController@editgeneral')->name('nonlog.editgeneral');
+    Route::post('/nonlog/storegraderin', 'ReceiptNonLogController@storegraderin')->name('nonlog.storegraderin');
+    Route::post('/nonlog/storegraderout', 'ReceiptNonLogController@storegraderout')->name('nonlog.storegraderout');
+    Route::get('/nonlog/generate_itemcode/{id}', 'ReceiptNonLogController@generate_itemcode')->name('nonlog.generate_itemcode');
+    Route::get('/nonlog/generate_pricing/{id}', 'ReceiptNonLogController@generate_pricing');
+    
 });
+
+
+//sawn timber
+Route::prefix('ST')->name('ST.')->group(function ()
+{
+    Route::get('/', 'STcontroller@create')->name('create');
+    Route::post('/store', 'STcontroller@store')->name('store');
+
+    Route::post('/storetblgrade', 'STcontroller@store_tblgrade')->name('store.tblgrade');
+    Route::get('/select_tt/{id}', 'STcontroller@select_tt');
+    Route::get('/edit/{id}', 'STcontroller@edit')->name('edit');
+    Route::post('/update/{id}', 'STcontroller@update')->name('update');
+
+});
+
 
 //invoice
 Route::prefix('invoice')->name('invoice.')->group(function ()

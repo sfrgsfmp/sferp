@@ -8,23 +8,16 @@ use App\Role;
 use App\Departemen;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
-//change password untuk SELAIN admin
 class changepasswordController extends Controller
 {
     public function index($id)
     {
-        // $user = User::find($id);
-        // return view('admin.users.show')->with(['id' => $user->id, 'datas' => Departemen::all(), 'roles' => Role::all()]);
-        // view('admin.users.show')
+        
         return view('changepassworduser')->with(['user' => User::find($id), 'datas' => Departemen::all(), 'roles' => Role::all()]);
 
-        // $user = User::find($id);
-        // $departments = Departemen::all();
-        // $roles = Role::all();
-
-        // return view('admin.users.show', ['id' => $user->id, 'departments' => $departments, 'roles' => $roles]);
-
+        
     }
 
     
@@ -43,12 +36,18 @@ class changepasswordController extends Controller
             return redirect()->back()->withErrors($validation->errors());
         }
 
-        $user->password = Hash::make($request['confrim_password']);
-        
-        $user->save();
+       
 
-        // return redirect()->route('changepassword.index', ['user' => $user->id])->with('success', 'Password successfully updated');
-        return redirect()->back()->with('success', 'Password successfully updated');
+        if (!(Hash::check($request->old_password, Auth::user()->password))) {
+            return redirect()->back()->with('warning', 'Your old password not same');
+        }
+        else
+        {
+            $user->password = Hash::make($request['confrim_password']);
+        
+            $user->save();
+            return redirect()->back()->with('success', 'Password successfully updated');
+        }
     }
 
 

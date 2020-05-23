@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class JO extends Model
 {
     protected $table = 'joborder';
-    protected $fillable = ['id','code_jo','jo','applydate','division','itemgroup_id','pimid','estdocm3','tuk','whgrade','whsimpan','whtahan', 'instruksilain','identitas', 'tebalfisik', 'lebarfisik', 'panjangfisik', 'descfisik','tebalbeli','lebarbeli','panjangbeli','descbeli','tebalinvoice','lebarinvoice','panjanginvoice','descinvoice','seratmiring','seratputus','bengkoklebar','bengkoktebal','gelombanglebar','gelombangtebal','twist','warnagelap','stain','taliair','busuk','pecahpermukaan','pecahujung','retak','matamati','kulittumbuh','pinholes','doreng','warnaterang','kayumuda','kukumacan','sisibaik','h2b','h2k','gubalsisiorder','gubalsisinonorder','cacatring','kualitas','is_delete'];
+    protected $fillable = ['id','code_jo','jo','applydate','division','objective_id','itemgroup_id','pimid','estdocm3','tuk','whgrade','whsimpan','whtahan', 'instruksilain','identitas', 'tebalfisik', 'lebarfisik', 'panjangfisik', 'descfisik','tebalbeli','lebarbeli','panjangbeli','descbeli','tebalinvoice','lebarinvoice','panjanginvoice','descinvoice','seratmiring','seratputus','bengkoklebar','bengkoktebal','gelombanglebar','gelombangtebal','twist','warnagelap','stain','taliair','busuk','pecahpermukaan','pecahujung','retak','matamati','kulittumbuh','pinholes','doreng','warnaterang','kayumuda','kukumacan','sisibaik','h2b','h2k','gubalsisiorder','gubalsisinonorder','cacatring','kualitas','is_delete'];
 
     // public function objectives()
     // {

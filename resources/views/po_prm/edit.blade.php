@@ -1871,7 +1871,7 @@
                                 <td> Approval</td>
                                 <td align=center> 
                                     <a class='selectipl' id="selectipl" data-id="{{$ipl->id}}" title="Choose">                        
-                                        <i class="fa fa-check-square-o"> </i>
+                                        <i class="fa fa-square-o"> </i>
                                     </a>
                                 </td>
                             </tr>

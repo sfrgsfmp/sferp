@@ -7,12 +7,12 @@ table.layout {
     width: 100%;  
     border: 1px solid black;
 }
-/* table.c.td {
+table.c.td {
     border: 1px solid black;
-} */
+}
 
 </style>
-<table width=100% class="layout">
+<table width=100%>
     <tr>
         <td align=left width="10%">
             <img style="vertical-align: top" src="{{ ('image/MIG_logo.png') }}" width="100" height="90" />
@@ -47,23 +47,21 @@ table.layout {
 <table class="table table-bordered">
   
     <tr>
-        <td> Nama </td> <td> {{ implode(',', $s->users()->get()->pluck('username')->toArray()) }} </td>
+        <td> Nama </td> <td> : {{ implode(',', $s->users()->get()->pluck('username')->toArray()) }} </td>
     </tr>
     <tr>
-        <td> Keperluan </td> <td> {{$s->keperluan}}</td>
+        <td> Keperluan </td> <td> : {{$s->keperluan}}</td>
     </tr>
     <tr>
-        <td> Terima Uang</td> <td> {{$s->uang_dinas}} </td>
+        <td> Terima Uang</td> <td> : Rp. {{$s->uang_dinas}} </td>
     </tr>
     <tr>
-        <td> Lama Tugas</td> <td> {{$s->start_date}} - {{$s->end_date}} </td>
+        <td> Lama Tugas</td> <td> : {{$s->start_date}} - {{$s->end_date}} </td>
     </tr>
     @endforeach
-    
-    
 </table>
-
-<table class="c" border=1 width="100%" style="width:100%">
+<br>
+<table class="c" border=1 width="100%">
     <thead>
         <tr>
             <td> Kendaraan</td>
@@ -97,14 +95,14 @@ table.layout {
     </tbody>
 </table>
 
-<table width=100% class="layout">
+<table width=100%>
         <tr> 
             <td align=center height=80> Dibuat </td>
             <td align=center > Disetujui oleh</td>
         </tr>
-        <br>
-        <br>
-        <tr >
+        <br><br>
+        
+        <tr>
         @foreach($send as $b)
             <td align=center height=80> {{ implode(',', $b->users()->get()->pluck('username')->toArray()) }} </td>
         @endforeach

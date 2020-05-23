@@ -45,7 +45,9 @@ class TTcontroller extends Controller
 
         $po_id = PIM::where(['id'=>$id, 'is_delete'=>'0'])->pluck('po_reference');
         $po = PO::where(['id'=>$po_id, 'is_delete'=>'0', 'status'=>'Approved'])->pluck('code');
-        $species = PO_detail::where(['code_po'=>$po, 'is_delete'=>'0'])->pluck('species_id');
+        // $species = PO_detail::where(['code_po'=>$po, 'is_delete'=>'0'])->pluck('species_id');
+        $species = PO::where(['id'=>$po_id, 'is_delete'=>'0'])->pluck('speciess');
+
         $speciesname = Species::where('id',$species)->pluck('name');
 
         $certificate_id = PO::where(['id'=>$po_id, 'is_delete'=>'0', 'status'=>'Approved'])->pluck('certificate');
@@ -246,6 +248,7 @@ class TTcontroller extends Controller
         $p->tipe = $request->get('tipe');
         $p->btg = $request->get('btg');
         $p->m3 = $request->get('m3');
+        $p->format_phisicqty = $request->get('format_phisicqty');
         $p->save();
 
         return redirect()->back()->with('success', 'Data has been created');
@@ -256,7 +259,8 @@ class TTcontroller extends Controller
         $pimid = TT::where(['id'=>$id,'is_delete'=>'0'])->pluck('pimid');
         $po_id = PIM::where(['id'=>$pimid, 'is_delete'=>'0'])->pluck('po_reference');
         $po = PO::where(['id'=>$po_id, 'is_delete'=>'0', 'status'=>'Approved'])->pluck('code');
-        $species = PO_detail::where(['code_po'=>$po, 'is_delete'=>'0'])->pluck('species_id');
+        // $species = PO_detail::where(['code_po'=>$po, 'is_delete'=>'0'])->pluck('species_id');
+        $species = PO::where(['id'=>$po_id, 'is_delete'=>'0', 'status'=>'Approved'])->pluck('speciess');
         $speciesname = Species::where('id',$species)->pluck('name');
         
         $objectiveid = PIM::where(['id'=>$pimid, 'is_delete'=>'0'])->pluck('objective');
@@ -350,6 +354,7 @@ class TTcontroller extends Controller
         $p->tipe = $request->get('tipe');
         $p->btg = $request->get('btg');
         $p->m3 = $request->get('m3');
+        $p->format_phisicqty = $request->get('format_phisicqty');
         $p->save();
 
         return redirect()->route('tt.create')->with('success', 'Data has been updated');

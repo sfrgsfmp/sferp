@@ -25,7 +25,6 @@ class ChangeUserPswdController extends Controller
 
     public function update(Request $request, $id)
     {
-        // $activetab = "active";
         $user = User::find($id);
         $validation = Validator::make($request->all(), [
             'old_password' => 'required',
@@ -38,11 +37,22 @@ class ChangeUserPswdController extends Controller
             return redirect()->back()->withErrors($validation->errors())->with('warning', 'Please check your input');
         }
 
-        $user->password = Hash::make($request['confrim_password']);
-        $user->save();
+        if (!(Hash::check($request->old_password, Auth::user()->password))) {
+           
+            return redirect()->back()->with('warning', 'Your old password not same');
+        }
+        else
+        {
+            $user->password = Hash::make($request['confrim_password']);
+        
+            $user->save();
+            return redirect()->back()->with('success', 'Password successfully updated');
+        }
 
-        // return redirect()->route('admin.users.index', ['id' => $user->id])->with('success', 'Password successfully updated');
-        return redirect()->back()->with('success', 'Password successfully updated');
+        // $user->password = Hash::make($request['confrim_password']);
+        // $user->save();
+
+        // return redirect()->back()->with('success', 'Password successfully updated');
     }
 
    

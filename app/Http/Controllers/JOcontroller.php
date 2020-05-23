@@ -57,7 +57,9 @@ class JOcontroller extends Controller
 
         $parcel = PIM::where(['id'=>$id, 'is_delete'=>'0'])->pluck('noparcel');
         $estdoc = PIM::where(['id'=>$id, 'is_delete'=>'0'])->pluck('estdocm3');
-        $species = PO_detail::where(['code_po'=>$po, 'is_delete'=>'0'])->pluck('species_id');
+        // $species = PO_detail::where(['code_po'=>$po, 'is_delete'=>'0'])->pluck('species_id');
+        $species = PO::where(['id'=>$po_id, 'is_delete'=>'0'])->pluck('speciess');
+
         $speciesname = Species::where('id',$species)->pluck('name');
         $measurement = PO::where(['id'=>$po_id, 'is_delete'=>'0', 'status'=>'Approved'])->pluck('measurement');
         $document = PO::where(['id'=>$po_id, 'is_delete'=>'0', 'status'=>'Approved'])->pluck('document');
@@ -156,7 +158,7 @@ class JOcontroller extends Controller
         $p->applydate= $request->get('applydate');
         $p->division = $request->get('division');
         $p->itemgroup_id = $request->get('itemgroup_id');
-        // $p->objective = $request->get('objective');
+        $p->objective_id = $request->get('objective');
         $p->pimid = $request->get('pimid');
         $p->estdocm3 = $request->get('estdocm3');
         $p->tuk = $request->get('tuk');
@@ -239,7 +241,8 @@ class JOcontroller extends Controller
 
         $poss = PO::where(['id'=>$po_reference, 'is_delete'=>'0', 'status'=>'Approved'])->pluck('code');
         $species = PO_detail::where(['code_po'=>$poss, 'is_delete'=>'0'])->pluck('species_id');
-        $speciesname = Species::where('id',$species)->pluck('name');
+        $species_id = PO::where('id',$po_reference)->pluck('speciess');
+        $speciesname = Species::where('id',$species_id)->pluck('name');
 
         $measurement = PO::where(['id'=>$po_reference, 'is_delete'=>'0', 'status'=>'Approved'])->pluck('measurement');
         $document = PO::where(['id'=>$po_reference, 'is_delete'=>'0', 'status'=>'Approved'])->pluck('document');
@@ -266,7 +269,7 @@ class JOcontroller extends Controller
             
             'tuk' => ['required'],
             'identitas' => ['required'],
-            'instruksilain' => ['required'],
+            // 'instruksilain' => ['required'],
         ]);
         
         $p = JO::find($id);
@@ -278,7 +281,7 @@ class JOcontroller extends Controller
         $p->division = $request->get('division');
         $p->itemgroup_id = $request->get('itemgroup_id');
         
-        // $p->objective = $request->get('objective');
+        $p->objective_id = $request->get('objective');
         $p->pimid = $request->get('pimid');
         $p->estdocm3 = $request->get('estdocm3');
         $p->tuk = $request->get('tuk');
@@ -376,8 +379,9 @@ class JOcontroller extends Controller
             ->leftJoin('quality as x','joborder.kukumacan','=','x.id')
             ->leftJoin('quality as y','joborder.sisibaik','=','y.id')
             ->leftJoin('quality as z','joborder.h2b','=','z.id')
+            ->leftJoin('objective as obj', 'joborder.objective_id','=','obj.id')
 
-            ->select('joborder.*','pim.noparcel','pim.sortimen','species.code as speciesname','tpk.name_tpk','vendor.name_vendor','certificate.cert_code', 'certificate.kode_fsc','vehicle.vehicle_code','pim.notransport', 'pim.date','po_transaction.document','po_transaction.measurement','po_transaction.qualitynote','c.name_vendor as contractor','whg.warehouse_code as whgrader','whs.warehouse_code as whsimpan', 'wht.warehouse_code as whtahan','po_transaction.spec_id','d.quality_code as seratmiring','e.quality_code as seratputus','f.quality_code as bengkoklebar','g.quality_code as bengkoktebal', 'h.quality_code as gelebar','i.quality_code as geltebal','j.quality_code as twist','k.quality_code as wglp','l.quality_code as stain','m.quality_code as taliair','n.quality_code as bsk','o.quality_code as pecahp','p.quality_code as pecahu')
+            ->select('joborder.*','pim.noparcel','pim.sortimen','species.code as speciesname','tpk.name_tpk','vendor.name_vendor','certificate.cert_code', 'certificate.kode_fsc','vehicle.vehicle_code','pim.notransport', 'pim.date','po_transaction.document','po_transaction.measurement','po_transaction.qualitynote','c.name_vendor as contractor','whg.warehouse_code as whgrader','whs.warehouse_code as whsimpan', 'wht.warehouse_code as whtahan','po_transaction.spec_id','d.quality_code as seratmiring','e.quality_code as seratputus','f.quality_code as bengkoklebar','g.quality_code as bengkoktebal', 'h.quality_code as gelebar','i.quality_code as geltebal','j.quality_code as twist','k.quality_code as wglp','l.quality_code as stain','m.quality_code as taliair','n.quality_code as bsk','o.quality_code as pecahp','p.quality_code as pecahu', 'obj.objective_name')
             ->where([
                 ['joborder.id','=',$id],
                 ['joborder.is_delete','=','0']

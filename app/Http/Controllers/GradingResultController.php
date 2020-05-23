@@ -88,11 +88,11 @@ class GradingResultController extends Controller
         $sg = GradingResult::orderBy('tipebiaya')->where('sendgrader_id', $id)->pluck('sendgrader_id');
         
         $sendgraders = SendGrader::find($sg);
-        // dd($sg);
+        
         $pdf = PDF::loadView('grading_result.resultpdf', compact('gradingresult', 'sendgraders'));
         
         return $pdf->download('Grading Result.pdf');
-        // dd($id);
+        
     }
 
     public function store(Request $request)
@@ -203,7 +203,9 @@ class GradingResultController extends Controller
         {
             $pdf = PDF::loadView('grading_result.resultpdf', compact('result',  'send'));
         
-            return $pdf->download('Grading Result.pdf');
+            // return $pdf->download('Grading Result.pdf');s
+            
+            return $pdf->stream('Grading Result.pdf');
         }
         
     }

@@ -35,7 +35,7 @@
                 </div>
                 <div class="ibox-content">
                     
-                    <form action="{{ route ('gradingresult.choose') }}" method="post">
+                    <form action="{{ route ('gradingresult.choose') }}" method="post" target="_blank">
                         @csrf
                         <div class="form-group row">
                             <div class="col-lg-1">

@@ -51,11 +51,7 @@
                     <button type="button" class="btn btn-primary btn-xs"> Edit </button>
                   </a>
 
-                  <form action="{{ route('admin.users.destroy', $user->id) }}" method="post">
-                    {{ method_field('DELETE') }}
-                    @csrf
-                    <button type="submit" class="btn btn-danger btn-xs ml-1"> Delete </button>
-                  </form>
+                   <button type="button" class="demo1 btn btn-danger btn-xs ml-1" data-id="{{ $user->id}}"> Delete </button>
               </td>
             </tr>
             
@@ -81,4 +77,45 @@
     </div>
   </div>
 </div>
+<script>
+    $(document).ready(function () {
+        $('.demo1').click(function (e)
+        {
+            e.preventDefault();
+            var id = $(this).data('id');
+            console.log(id);
+            swal(
+            {
+                title: "Are you sure want to delete this user?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Yes, delete it!",
+                cancelButtonText: "No, cancel!",
+                },
+                    function (isConfirm)
+                    {
+                        if (isConfirm)
+                        {
+                            $.ajax({
+                                type : "GET",
+                                url : "{{ url('admin/users/destroy')}}" + '/' + id,
+                                data : {id:id},
+                                success: function (data)
+                                {
+                                    swal("Done!", "Your data has been delete.", "success");
+                                    location.reload();
+                                }   
+                            });
+                        }
+                        else
+                        {
+                            swal("Cancelled", "Your data is safe :)", "error");
+                            
+                        }
+                    }
+                );
+        }); 
+    });
+</script>
 @endsection

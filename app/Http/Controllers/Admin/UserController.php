@@ -117,7 +117,8 @@ class UserController extends Controller
 
             //mengubah status user menjadi 0=nonaktif. user trsbt di tabel masih ada
             $user->update(['status'=>'0']);
-            return redirect()->route('admin.users.index')->with('success', 'User has been deleted');
+            // return redirect()->route('admin.users.index')->with('success', 'User has been deleted');
+            return back()->with('success', 'User has been delete.');
         }
 
         // return redirect()->route('admin.users.index')->with('warning', 'This user can not be delete');

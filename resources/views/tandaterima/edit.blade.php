@@ -436,12 +436,21 @@
                                 <div class="form-group row">
                                     <label class="col-sm-3 col-form-label">Phisic Qty</label>
                                     <div class="col-sm-8">
-                                        <input type="text" class="form-control @error('phisic_qty') is-invalid @enderror" id="phisic_qty" name="phisic_qty" value="{{ $tt->phisic_qty }}">
-                                        @error('phisic_qty')
-                                            <span class="invalid-feedback" role="alert">
-                                                <strong>{{ $message }}</strong>
-                                            </span>
-                                        @enderror
+
+                                        <div class="input-daterange input-group">
+                                            <input type="text" class="form-control @error('phisic_qty') is-invalid @enderror" id="phisic_qty" name="phisic_qty" value="{{ $tt->phisic_qty }}">
+                                            @error('phisic_qty')
+                                                <span class="invalid-feedback" role="alert">
+                                                    <strong>{{ $message }}</strong>
+                                                </span>
+                                            @enderror
+                                            <!-- //0 batang, 1 pallet -->
+                                            <select class="form-control @error('format_phisicqty') is-invalid @enderror" id="format_phisicqty" name="format_phisicqty">
+
+                                                <option value="0" {{ ($tt->format_phisicqty === '0') ? 'selected' : ''}}> Batang</option>
+                                                <option value="1" {{ ($tt->format_phisicqty === '1') ? 'selected' : ''}}> Pallet</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -955,9 +964,12 @@
                                 <td>{{$pim->estdocm3}}</td>
                                 <td>{{$pim->spb}}</td>
                                 <td align=center> 
-                                    <a class='selectpim' id="selectpim" data-id="{{$pim->id}}" title="Choose">                        
+                                    <!-- <a class='selectpim' id="selectpim" data-id="{{$pim->id}}" title="Choose">                        
                                         <i class="fa fa-check-square-o"> </i>
-                                    </a>
+                                    </a> -->
+                                    <button type="button" id="selectpim" class="btn btn-outline btn-link" onclick="selectpim({{$pim->id}})"  title="Choose">
+                                        <i class="fa fa-square-o"> </i>
+                                    </button>
                                 </td>
                             </tr>
                             @endforeach
@@ -975,55 +987,52 @@
 
 <script>
 //SELECT PIM FROM MODAL
-$(document).ready(function(){
-        $('.selectpim').click(function(e){
-            e.preventDefault();
-            var id = $(this).data('id');
-            if(id)
-            {
-                console.log('id = '+id);
+    function selectpim($id)
+    {
+        if($id)
+        {
+            console.log('id = '+$id);
+            // alert($id);
 
-                $.ajax({
-                    url: '/TT/selectpim/'+id,
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function(data){
-                        console.log(data);
-                        $('#pimid').val(data[0]);
-                        $('#pim_code').val(data[1]);
-                        $('#pim_no').val(data[2]);
-                        $('#prm_no').val(data[3]);
-                        $('#parcel_no').val(data[4]);
-                        $('#species').val(data[5]);
-                        $('#type_certificate').val(data[6]);
-                        $('#kode_fsc').val(data[7]);
-                        $('#wwf_type').val(data[8]);
-                        $('#vendor_id').val(data[9]);
-                        $('#tpk_id').val(data[10]);
-                        $('#kph_id').val(data[11]);
-                        $('#objective').val(data[12]);
-                        $('#whbongkar').val(data[13]);
-                        $('#whstapel').val(data[14]);
-                        $('#type_transportation').val(data[15]);
-                        $('#no_transportation').val(data[16]);
-                        $('#starttime').val(data[17]);
-                        $('#endtime').val(data[18]);
-                        $('#headcount').val(data[19]);
-                        $('#no_spb').val(data[20]);
-                        $('#sortimen').val(data[21]);
-                        $('#spec1').val(data[22]);
-                        $('#contractor').val(data[23]);
-                        $('#workshift').val(data[24]);
-                        $('#rateused').val(data[25]);
-                        $('#handling').val(data[26]);
+            $.ajax({
+                url: '/TT/selectpim/'+$id,
+                type: 'GET',
+                dataType: 'json',
+                success: function(data){
+                    console.log(data);
+                    $('#pimid').val(data[0]);
+                    $('#pim_code').val(data[1]);
+                    $('#pim_no').val(data[2]);
+                    $('#prm_no').val(data[3]);
+                    $('#parcel_no').val(data[4]);
+                    $('#species').val(data[5]);
+                    $('#type_certificate').val(data[6]);
+                    $('#kode_fsc').val(data[7]);
+                    $('#wwf_type').val(data[8]);
+                    $('#vendor_id').val(data[9]);
+                    $('#tpk_id').val(data[10]);
+                    $('#kph_id').val(data[11]);
+                    $('#objective').val(data[12]);
+                    $('#whbongkar').val(data[13]);
+                    $('#whstapel').val(data[14]);
+                    $('#type_transportation').val(data[15]);
+                    $('#no_transportation').val(data[16]);
+                    $('#starttime').val(data[17]);
+                    $('#endtime').val(data[18]);
+                    $('#headcount').val(data[19]);
+                    $('#no_spb').val(data[20]);
+                    $('#sortimen').val(data[21]);
+                    $('#spec1').val(data[22]);
+                    $('#contractor').val(data[23]);
+                    $('#workshift').val(data[24]);
+                    $('#rateused').val(data[25]);
+                    $('#handling').val(data[26]);
 
-                        $('#myModal5').modal('hide');
-                    }
-                })
-            }
-        })
-    })
-
+                    $('#myModal5').modal('hide');
+                }
+            })
+        }
+    }
 </script>
 <script>
 $(document).ready(function(){

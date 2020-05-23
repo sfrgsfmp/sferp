@@ -9,10 +9,13 @@ use Illuminate\Support\Facades\DB;
 
 class ReceiptLog extends Model
 {
-    //receipt log //tab general
     protected $table = 'receiptlog';
-    protected $fillable = ['id','code','pimid','status','itemgroup_id','division','applydate', 'from_warehouse', 'to_warehouse', 'objective', 'ppc', 'remarks', 'perni', 'fakb', 'unitsize', 'unitprice', 'is_delete', 'pph23', 'pph22', 'pph21','ppn', 'trucking', 'administration', 'lainlain', 'unit_trucking'];
+    protected $fillable = ['id','id_receipthph','code','tt_id','pimid','status','itemgroup_id','division','applydate', 'from_warehouse', 'to_warehouse', 'objective', 'ppc', 'remarks', 'perni', 'fakb', 'unitsize', 'unitprice', 'pph23', 'pph22', 'pph21','ppn', 'trucking', 'administration', 'lainlain', 'unit_trucking', 'is_delete'];
 
+    public function hph()
+    {
+        return $this->hasMany('App\ReceiptHPH', 'id', 'id_receipthph');
+    }
     public function pph23()
     {
         return $this->hasMany('App\Tax', 'id', 'pph23');
@@ -32,6 +35,11 @@ class ReceiptLog extends Model
     public function unitrucking()
     {
         return $this->hasMany('App\Measurement', 'id', 'unit_trucking');
+    }
+
+    public function tts()
+    {
+        return $this->hasMany('App\TT', 'id', 'tt_id');
     }
 
     public function pim()
@@ -75,6 +83,18 @@ class ReceiptLog extends Model
         return $tt;
     }
 
+    public function scopettnonlog()
+    {
+        $tt = DB::table('receiptlog')
+            ->leftJoin('pim', 'receiptlog.pimid', '=', 'pim.id')
+            ->leftJoin('tandaterima', 'receiptlog.tt_id', '=', 'tandaterima.id')
+            ->leftJoin('po_transaction', 'pim.po_reference', '=', 'po_transaction.id')
+            ->leftJoin('species', 'po_transaction.speciess', '=', 'species.id')
+            ->select('receiptlog.id','receiptlog.code','pim.code_pim','pim.pimno','tandaterima.code_tt', 'tandaterima.tt_no', 'tandaterima.no_document','pim.sortimen', 'pim.noparcel', 'species.name')
+            ->where(['receiptlog.type_receipt'=>'2'])
+            ->get();
+        return $tt;
+    }
     // public function tandatrm()
     // {
     //     return $this->pim()->with('tandaterima')->get();

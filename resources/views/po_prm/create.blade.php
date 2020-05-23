@@ -1819,7 +1819,7 @@
                                 <td> Approval</td>
                                 <td align=center> 
                                     <a class='selectipl' id="selectipl" data-id="{{$ipl->id}}" title="Choose">                        
-                                        <i class="fa fa-check-square-o"> </i>
+                                        <i class="fa fa-square-o"> </i>
                                     </a>
                                 </td>
                             </tr>
@@ -1837,34 +1837,6 @@
 </div>
 
 
-<script>
-    // $('[data-toggle="tabajax"]').click(function(e) {
-    //     var $this = $(this),
-    //         loadurl = $this.attr('href'),
-    //         targ = $this.attr('data-target');
-
-    //         // window.location.hash = targ;
-    //     // $.get(loadurl, function(data) {
-    //     //     $(targ).html(data);
-    //     // });
-
-    //     console.log(loadurl);
-    //     // window.location = loadurl;
-    //     $.ajax({
-    //         url: loadurl,
-    //         type: 'GET',
-    //         dataType: 'html',
-    //         success: function(data){
-    //             // console.log(data);
-    //             window.location.hash = targ;
-                
-    //         }
-    //     })
-
-    //     $this.tab('show');
-    //     return false;
-    // });
-</script>
 
 <script>
     $(document).ready(function(){
@@ -2266,7 +2238,7 @@ $(document).ready(function(){
             var id = $(this).data('id');
             if(id)
             {
-                console.log('id = '+id);
+                console.log('id ipl = '+id);
 
                 $.ajax({
                     url: '/po/selectipl/'+id,

@@ -59,7 +59,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- <div class="form-group row">
+                                    <div class="form-group row">
                                         <label class="col-sm-2 col-form-label">Objective</label>
                                         <div class="col-sm-10">
                                             <select id="objective" name="objective" class="chosen-select form-control @error('objective') is-invalid @enderror">
@@ -73,7 +73,7 @@
                                                 </span>
                                             @enderror
                                         </div>
-                                    </div> -->
+                                    </div>
                                 </div>
                                 <div class="col-sm-3">
                                     <div class="form-group row">
@@ -1233,9 +1233,9 @@
                                 <td>{{$pim->estdocm3}}</td>
                                 <td>{{$pim->spb}}</td>
                                 <td align=center> 
-                                    <a class='selectpim' id="selectpim" data-id="{{$pim->id}}" title="Choose">                        
-                                        <i class="fa fa-check-square-o"> </i>
-                                    </a>
+                                    <button type="button" id="selectpim" class="btn btn-outline btn-link" onclick="selectpim({{$pim->id}})"  title="Choose">
+                                        <i class="fa fa-square-o"> </i>
+                                    </button>
                                 </td>
                             </tr>
                             @endforeach
@@ -1276,44 +1276,42 @@
 
   
 //SELECT PIM FROM MODAL
-    $(document).ready(function(){
-        $('.selectpim').click(function(e){
-            e.preventDefault();
-            var id = $(this).data('id');
-            if(id)
-            {
-                console.log('id = '+id);
+    function selectpim($id)
+    {
+        if($id)
+        {
+            console.log('id = '+$id);
 
-                $.ajax({
-                    url: '/JO/selectpim/'+id,
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function(data){
-                        console.log(data);
-                        $('#pim_code').val(data[0]);
-                        $('#pimno').val(data[1]);
-                        $('#vendor').val(data[2] + ' - '+ data[18]);
-                        $('#po_reference').val(data[3]);
-                        $('#spec1').val(data[4]);
-                        $('#sortimen').val(data[5]);
-                        $('#certificate').val(data[6]);
-                        $('#kodefsc').val(data[7]);
-                        $('#typetransport').val(data[8]);
-                        $('#notransport').val(data[9]);
-                        $('#etadate').val(data[10]);
-                        $('#parcel').val(data[11]);
-                        $('#estdocm3').val(data[12]);
-                        $('#species').val(data[13]);
-                        $('#measurement').val(data[14]);
-                        $('#document').val(data[15]);
-                        $('#contractor').val(data[16]);
-                        $('#pimid').val(data[17]);
-                        $('#myModal5').modal('hide');
-                    }
-                })
-            }
-        })
-    })
+            $.ajax({
+                url: '/JO/selectpim/'+$id,
+                type: 'GET',
+                dataType: 'json',
+                success: function(data){
+                    console.log(data);
+                    $('#pim_code').val(data[0]);
+                    $('#pimno').val(data[1]);
+                    $('#vendor').val(data[2] + ' - '+ data[18]);
+                    $('#po_reference').val(data[3]);
+                    $('#spec1').val(data[4]);
+                    $('#sortimen').val(data[5]);
+                    $('#certificate').val(data[6]);
+                    $('#kodefsc').val(data[7]);
+                    $('#typetransport').val(data[8]);
+                    $('#notransport').val(data[9]);
+                    $('#etadate').val(data[10]);
+                    $('#parcel').val(data[11]);
+                    $('#estdocm3').val(data[12]);
+                    $('#species').val(data[13]);
+                    $('#measurement').val(data[14]);
+                    $('#document').val(data[15]);
+                    $('#contractor').val(data[16]);
+                    $('#pimid').val(data[17]);
+                    $('#myModal5').modal('hide');
+                }
+            })
+        }
+    }
+    
 </script>
 <script>
     $(document).ready(function () {

@@ -130,10 +130,19 @@ class ReceiptController extends Controller
 
         $receipts = ReceiptLog::tt();
         $receiptandtt = ReceiptLog::receiptlogandtts();
-        // dd($receiptandtt);
-        // ReceiptLog::where('is_delete','0')->get()
+    
 
-        return view('receipt.input')->with(['datas'=>Departemen::all(), 'tts'=>TT::where(['is_delete'=>'0'])->get(), 'pims'=>PIM::where(['is_delete'=>'0'])->get(),'warehouse'=>Warehouse::where(['is_delete'=>'0'])->get(), 'company'=>Company::all(), 'itemgroup'=>Itemgroup::where('is_delete','0')->get(), 'provinces'=>IndProv::all(), 'objective'=>Objective::where('is_delete','0')->get(), 'measurement'=>Measurement::where('is_delete','0')->get(), 'receipts'=>$receipts, 'receipt'=>ReceiptLog::where('is_delete','0')->get(), 'remarks'=>Remarks::where('is_delete','0')->get(), 'rvendors'=>ReceiptLogVendor::all(), 'rdocument'=>ReceiptLogDocument::all(), 'rgraderout'=>ReceiptLogGraderOut::all(), 'rgraderin'=>ReceiptLogGraderIn::all(), 'rgrader'=>receiptgrader::all(), 'rexternal'=>$rexternal, 'invoicing'=> ReceiptLogInvoicing::all(), 'taxs'=>Tax::all() ]);
+
+        $tt = DB::table('tandaterima')
+            ->leftJoin('pim', 'tandaterima.pimid', '=', 'pim.id')
+            ->leftJoin('po_transaction', 'pim.po_reference', 'po_transaction.id')
+            ->leftJoin('species', 'po_transaction.speciess' ,'=', 'species.id')
+            ->leftJoin('tpk','pim.tpk_id', '=','tpk.id')
+            ->leftJoin('vendor', 'pim.vendor_id','=', 'vendor.id')
+            ->select('tandaterima.*','tandaterima.id as tt_id', 'pim.code_pim', 'pim.pimno', 'po_transaction.code', 'species.name as speciesname', 'pim.sortimen', 'pim.noparcel','vendor.name_vendor','tpk.name_tpk')
+            ->get();
+
+        return view('receipt.input')->with(['datas'=>Departemen::all(), 'tts'=>TT::where(['is_delete'=>'0'])->get(), 'tt'=>$tt,'pims'=>PIM::where(['is_delete'=>'0'])->get(),'warehouse'=>Warehouse::where(['is_delete'=>'0'])->get(), 'company'=>Company::all(), 'itemgroup'=>Itemgroup::where('is_delete','0')->get(), 'provinces'=>IndProv::all(), 'objective'=>Objective::where('is_delete','0')->get(), 'measurement'=>Measurement::where('is_delete','0')->get(), 'receipts'=>$receipts, 'receipt'=>ReceiptLog::where('is_delete','0')->orderBy('id', 'desc')->get(), 'remarks'=>Remarks::where('is_delete','0')->get(), 'rvendors'=>ReceiptLogVendor::all(), 'rdocument'=>ReceiptLogDocument::all(), 'rgraderout'=>ReceiptLogGraderOut::all(), 'rgraderin'=>ReceiptLogGraderIn::all(), 'rgrader'=>receiptgrader::all(), 'rexternal'=>$rexternal, 'invoicing'=> ReceiptLogInvoicing::all(), 'taxs'=>Tax::all() ]);
     }
 
 
@@ -169,13 +178,11 @@ class ReceiptController extends Controller
 
     public function generate_itemcode($id)
     {    
-        // $urutan = 1;
-        // $urutanitem = 1;
         
         $rex = DB::table('receiptlogdetail_document')
-            ->join('receiptlogdetail_vendor', 'receiptlogdetail_document.nextmap', '=', 'receiptlogdetail_vendor.nextmap')
-            ->join('receiptlogdetail_graderin', 'receiptlogdetail_document.nextmap', '=', 'receiptlogdetail_graderin.nextmap')
-            ->join('receiptlog', 'receiptlogdetail_document.receiptlog_id', '=', 'receiptlog.id')
+            ->leftJoin('receiptlogdetail_vendor', 'receiptlogdetail_document.nextmap', '=', 'receiptlogdetail_vendor.nextmap')
+            ->leftJoin('receiptlogdetail_graderin', 'receiptlogdetail_document.nextmap', '=', 'receiptlogdetail_graderin.nextmap')
+            ->leftJoin('receiptlog', 'receiptlogdetail_document.receiptlog_id', '=', 'receiptlog.id')
             ->select('receiptlogdetail_document.nextmap as dnextmap', 'receiptlogdetail_document.dia as ddia', 'receiptlogdetail_document.length as dlength', 'receiptlogdetail_document.quality as dquality', 'receiptlogdetail_graderin.owner as inowner')
             ->where([
                 ['receiptlogdetail_document.receiptlog_id', '=', $id],
@@ -250,10 +257,6 @@ class ReceiptController extends Controller
     
                     $insert_data[] = $data; 
                     // $ex = ReceiptLogExternal::create($data);
-
-                
-               
-
                 
                 try
                 {
@@ -276,7 +279,7 @@ class ReceiptController extends Controller
             } 
 
             $rexi = DB::table('receiptlogdetail_external')
-            ->join('receiptlogdetail_document', 'receiptlogdetail_external.nextmap', '=', 'receiptlogdetail_document.nextmap')
+            ->leftJoin('receiptlogdetail_document', 'receiptlogdetail_external.nextmap', '=', 'receiptlogdetail_document.nextmap')
             // ->join('receiptlogdetail_graderin', 'receiptlogdetail_external.nextmap', '=', 'receiptlogdetail_graderin.nextmap')
             ->select('receiptlogdetail_external.noproduct','receiptlogdetail_external.codeproduct', 'receiptlogdetail_document.dia as ddia')
             ->distinct('receiptlogdetail_external.noproduct')
@@ -387,7 +390,7 @@ class ReceiptController extends Controller
            
 
             $rexi = DB::table('receiptlogdetail_external')
-                ->join('receiptlogdetail_document', 'receiptlogdetail_external.nextmap', '=', 'receiptlogdetail_document.nextmap')
+                ->leftJoin('receiptlogdetail_document', 'receiptlogdetail_external.nextmap', '=', 'receiptlogdetail_document.nextmap')
                 ->select('receiptlogdetail_external.noproduct','receiptlogdetail_external.codeproduct', 'receiptlogdetail_document.dia as ddia')
                 ->distinct('receiptlogdetail_external.noproduct')
                 ->where([
@@ -719,8 +722,194 @@ class ReceiptController extends Controller
             }
         }
 
-        return redirect()->to('receipt/invoicing')->with('success','Generate Invoicing from has been successfully.'); 
+        return redirect()->to('receipt/invoicing')->with('success','Generate Invoicing has been successfully.'); 
 
+    }
+
+    public function generate_invoicing2($ids)
+    {
+        $array = explode(',', $ids);
+        $count = count($array);
+
+        foreach($array as $id)
+        {
+            //RANGE SIZE
+            $get_sortimen = DB::table('sortimendet')
+                    ->leftJoin('sortimen','sortimendet.sortimen_code','=','sortimen.id')
+                    ->select('sortimen.code','sortimendet.*')
+                    ->get();
+            foreach($get_sortimen as $getsortimen)
+            {
+                $get_dia = $getsortimen->dia_det;
+                $get_sortimencode = $getsortimen->code;
+                $get_range_size = $getsortimen->range_size;
+
+                //grader in
+                $receipt_gin = DB::table('receiptlogdetail_graderin')
+                        ->select('dia_avg','nextmap')
+                        ->where([
+                            ['receiptlog_id','=', $id],
+                            ['dia_avg','=', $get_dia],
+                        ])->get();
+                foreach($receipt_gin as $recpgin)
+                {
+                    // $rangesize_in = $getsortimen->range_size;
+
+                    $nextmap = $recpgin->nextmap;
+
+                    //update range_size
+                    $recgin_po = DB::table('receiptlogdetail_graderin')
+                            ->where('nextmap',$nextmap)
+                            ->update(['range_size'=>$get_range_size]);
+                }
+
+
+                //grader out
+                $receipt_gout = DB::table('receiptlogdetail_graderout')
+                        ->select('dia_avg','nextmap')
+                        ->where([
+                            ['receiptlog_id','=', $id],
+                            ['dia_avg','=', $get_dia],
+                        ])->get();
+                foreach($receipt_gout as $recpgout)
+                {
+                    // $rangesize_gout = $getsortimen->range_size;
+                    $nextmap = $recpgout->nextmap;
+
+                    //update range_size
+                    $recgin_po = DB::table('receiptlogdetail_graderin')
+                            ->where('nextmap',$nextmap)
+                            ->update(['range_size'=>$get_range_size]);
+                }
+                        
+
+
+                //document
+                $receipt_doc = DB::table('receiptlogdetail_document')
+                        ->select('dia','nextmap')
+                        ->where([
+                            ['receiptlog_id','=', $id],
+                            ['dia','=', $get_dia],
+                        ])->get();
+                foreach($receipt_doc as $recpdoc)
+                {
+                    // $rangesizedoc = $get_sortimen->range_size;
+                    $nextmap = $recpdoc->nextmap;
+
+                    //updaate range_size
+                    DB::table('receiptlogdetail_document')
+                            ->where('nextmap',$nextmap)
+                            ->update(['range_size'=>$get_range_size]);
+                }
+
+                //vendor
+                $receipt_ven = DB::table('receiptlogdetail_vendor')
+                        ->select('dia','nextmap')
+                        ->where([
+                            ['receiptlog_id','=', $id],
+                            ['dia','=', $get_dia],
+                        ])->get();
+                foreach($receipt_ven as $recpven)
+                {
+                    // $rangesize_ven = $get_sortimen->range_size;
+                    $nextmap = $recpven->nextmap;
+                    //updaate range_size
+                    DB::table('receiptlogdetail_vendor')
+                            ->where('nextmap',$nextmap)
+                            ->update(['range_size'=>$get_range_size]);
+                }
+                    
+            }
+
+            //invoicing groupby by grader in
+            $in = DB::table('receiptlogdetail_graderin as a')
+            ->select(DB::raw('a.dia_avg, a.range_size, a.range_length, a.kwt, a.kph_type, a.hjd, a.po_price, a.p_m3,
+            (SELECT SUM(m3) FROM receiptlogdetail_document b WHERE b.receiptlog_id = '.$id.' AND b.range_size = a.range_size AND b.range_length = a.range_length AND b.quality = a.kwt AND b.kphtype = a.kph_type) as doc_m3,
+            (SELECT count(m3) FROM receiptlogdetail_document b WHERE b.receiptlog_id = '.$id.' AND b.range_size = a.range_size AND b.range_length = a.range_length AND b.quality = a.kwt AND b.kphtype = a.kph_type) as doc_qty,
+            
+            (SELECT SUM(m3) from receiptlogdetail_vendor c where c.receiptlog_id = '.$id.' AND c.range_size = a.range_size AND c.range_length = a.range_length AND c.quality = a.kwt AND c.kphtype = a.kph_type) as ven_m3,
+            (SELECT count(m3) FROM receiptlogdetail_vendor c WHERE c.receiptlog_id = '.$id.' AND c.range_size = a.range_size AND c.range_length = a.range_length AND c.quality = a.kwt AND c.kphtype = a.kph_type) as ven_qty,
+
+            (SELECT sum(p_m3) FROM receiptlogdetail_graderout d WHERE d.receiptlog_id = '.$id.' AND d.range_size = a.range_size AND d.range_length = a.range_length AND d.kwt = a.kwt AND d.kph_type = a.kph_type) as gout_m3,
+            (SELECT count(p_m3) FROM receiptlogdetail_graderout d WHERE d.receiptlog_id = '.$id.' AND d.range_size = a.range_size AND d.range_length = a.range_length AND d.kwt = a.kwt AND d.kph_type = a.kph_type) as gout_qty
+            '))
+            ->where('a.receiptlog_id', '=', $id)
+            ->groupBy('a.range_size','a.range_length','a.kwt','a.kph_type')
+            ->get(); 
+        
+            foreach($in as $in)
+            {
+                //source code dari receiptlog_id = 0 /1 ?
+                $sc = Receiptlog::where('id',$id)->pluck('source_price')[0];
+                if($sc == '0'){
+                    //dari PO
+                    $price_in = $in->po_price;
+                }elseif($sc == '1'){
+                    //dari HJD
+                    $price_in = $in->hjd;
+                }else{
+                    $price_in = '0';
+                }
+
+                //sortimen
+                $sortimen = SortimenDet::where(['dia_det'=>$in->dia_avg,'range_size'=>$in->range_size])->pluck('sortimen_code')[0];
+
+                //select grader in
+                $gin = DB::table('receiptlogdetail_graderin')
+                        ->select(DB::raw('SUM(p_m3) as in_m3'), DB::raw('COUNT(p_m3) as in_qty'))
+                        ->where([
+                            ['receiptlog_id','=',$id],
+                            ['range_size','=',$in->range_size],
+                            ['range_length','=',$in->range_length],
+                            ['kwt','=',$in->kwt],
+                            ['kph_type','=',$in->kph_type]
+                        ])->get();
+                        
+                foreach($gin as $gin)
+                {
+                    //insert ke tabel baru receipt_invoicing
+                    //jika sudah ada, update
+                    $cek_inv = DB::table('receiptlogdetail_invoicing')
+                            ->where([
+                                ['receiptlog_id','=',$id]
+                            ])
+                            ->get();
+                    foreach($cek_inv as $cekinv)
+                    {
+                        
+                    }
+
+                    // $invoice = DB::table('receiptlogdetail_invoicing')
+                    //         ->insert([
+                    //             'receiptlog_id'=> $id,
+                    //             'range_size'=>$in->range_size,
+                    //             'range_length'=>$in->range_length,
+                    //             'quality'=>$in->kwt,
+                    //             'sortimen'=>$sortimen,
+                    //             'kphtype'=>$in->kph_type,
+                    //             'price'=>$price_in,
+
+                    //             'in_qty'=> $gin->in_qty,
+                    //             'in_m3'=> $gin->in_m3,
+                    //             'in_totprice'=> $price_in * $gin->in_m3,
+                                
+                    //             'out_qty'=>$in->gout_qty,
+                    //             'out_m3'=>$in->gout_m3,
+                    //             'out_totprice'=>$price_in * $in->gout_m3,
+
+                    //             'doc_qty'=>$in->doc_qty,
+                    //             'doc_m3'=>$in->doc_m3,
+                    //             'doc_totprice'=>$price_in * $in->doc_m3,
+                                
+                    //             'ven_qty'=>$in->ven_qty,
+                    //             'ven_m3'=>$in->ven_m3,
+                    //             'ven_totprice'=>$price_in * $in->ven_m3
+                    //         ]);
+                }
+            }
+
+            // return redirect()->to('receipt/invoicing_parcel')->with('success','Generate Invoicing Parcel has been successfully.');
+        }
     }
 
     public function export_vendorreceipt(Request $request, $id)
@@ -736,7 +925,7 @@ class ReceiptController extends Controller
         $tt_id = TT::where('pimid', $pimid)->pluck('id');
         $phisic_qty = TT::where('id',$tt_id)->pluck('phisic_qty');
 
-        //cek dulu di tabel
+        
         $year = date('Y');
         $yr = Str::substr($year, 2, 2);
 
@@ -901,7 +1090,7 @@ class ReceiptController extends Controller
         $tt_id = TT::where('pimid', $pimid)->pluck('id');
         $phisic_qty = TT::where('id',$tt_id)->pluck('phisic_qty');
 
-        //cek dulu di tabel
+        
         $year = date('Y');
         $yr = Str::substr($year, 2, 2);
 
@@ -1211,7 +1400,7 @@ class ReceiptController extends Controller
         $vr = ReceiptLogGraderIn::all();
         if(! $vr->isEmpty()) //check
         {
-            // //ada
+            //ada
             $code = ReceiptLogGraderIn::get()->last()->nextmap;
             $c = Str::substr($code, -4);
             $cr = ltrim($c, 0);
@@ -1242,9 +1431,6 @@ class ReceiptController extends Controller
                     return Excel::download(new GraderInReceiptExport($id), 'ReceiptLogGraderIn_"'.$codereceipt.'".xlsx');
                 }
             }
-
-            
-
         }
         else
         {
@@ -1375,9 +1561,56 @@ class ReceiptController extends Controller
         return json_encode(array($code, $id));
     }
 
+    public function select_tt($id)
+    {
+        $tt_code = TT::where('id', $id)->pluck('code_tt');
+        $tt_no = TT::where('id', $id)->pluck('tt_no');
+        $skskb_no = TT::where('id',$id)->pluck('no_document');
+        $skskb_qty = TT::where('id',$id)->pluck('doc_qty');
+        $skskb_m3 = TT::where('id',$id)->pluck('docm3');
+        $phisic_qty = TT::where('id',$id)->pluck('phisic_qty');
+        $format_phisicqty = TT::where('id',$id)->pluck('format_phisicqty');
+
+        $pimid = TT::where('id',$id)->pluck('pimid');
+        $code_pim = PIM::where('id',$pimid)->pluck('code_pim');
+        $pimno = PIM::where('id',$pimid)->pluck('pimno');
+
+        $po_id = PIM::where('id', $pimid)->pluck('po_reference');
+        $po = PO::where('id',$po_id)->pluck('code');
+
+        $prm = PIM::where('id', $pimid)->pluck('noprocurement');
+        $vendor_id = PIM::where('id', $pimid)->pluck('vendor_id');
+        $vendor_name = Vendor::where('id',$vendor_id)->pluck('name_vendor');
+        $tpk_id = PIM::where('id',$pimid)->pluck('tpk_id');
+        $tpkname = TPK::where('id',$tpk_id)->pluck('name_tpk');
+
+        //kph = concession
+        $kphid = PIM::where('id', $pimid)->pluck('kph_id');
+        $kph = KPH::where('id',$kphid)->pluck('name_kph');
+
+        $doc = PO::where('id',$po_id)->pluck('document');
+        $measu = PO::where('id',$po_id)->pluck('measurement');
+        $npwp = PO::where('id',$po_id)->pluck('npwp');
+        $incoterms = PO::where('id',$po_id)->pluck('incoterms');
+        $noparcel = PIM::where('id',$pimid)->pluck('noparcel');
+        $notransport = PIM::where('id', $pimid)->pluck('notransport');
+        $speciesid = PO::where('id', $po_id)->pluck('speciess');
+        $species = Species::where('id', $speciesid)->pluck('name');
+
+        $certificate_id = PO::where('id',$po_id)->pluck('certificate');
+        $certificate = Certificate::where('id',$certificate_id)->pluck('cert_name');
+
+        
+        
+        return json_encode(array($id, $tt_code, $pimid, $code_pim, $pimno,
+        $po_id, $po, $prm, $vendor_id, $vendor_name, $tpk_id, $tpkname, $kph, $doc, $measu, $npwp, $incoterms, $tt_no, $noparcel, $notransport, $speciesid, $species, $skskb_no, $skskb_qty, $skskb_m3, $certificate, $phisic_qty, $format_phisicqty
+        ));
+    }
+
     public function selectpim($id)
     {
         $tt_id = TT::where('pimid', $id)->pluck('id');
+        // $tt_id = ReceiptLog::where
         $tt_code = TT::where('id', $tt_id)->pluck('code_tt');
         $tt_no = TT::where('id', $tt_id)->pluck('tt_no');
         $skskb_no = TT::where('id',$tt_id)->pluck('no_document');
@@ -1420,9 +1653,9 @@ class ReceiptController extends Controller
         $request->validate([
             'applydate' => ['required'],
             'division' => ['required'],
-            // 'ppc' => ['required']
+            'tt_id' => ['required','unique:receiptlog']
         ]);
-        // FORMAT CODE RECEIPT LOLG
+        // FORMAT CODE RECEIPT LOG
         // F015/01/SFMP/0819/855
 
         $get_applydate = $request->get('applydate'); //2020-02-28
@@ -1454,6 +1687,7 @@ class ReceiptController extends Controller
         $r = new ReceiptLog();
         $r->code = $codereceipt;
         $r->pimid = $request->get('pimid');
+        $r->tt_id = $request->get('ttid');
         $r->status = $request->get('status');
         $r->itemgroup_id = $request->get('itemgroup_id');
         $r->division = $request->get('division');
@@ -1478,7 +1712,7 @@ class ReceiptController extends Controller
         $r->lainlain = $request->get('lainlain');
         $r->unit_trucking = $request->get('unit_trucking');
         $r->save();
-        
+
         return redirect()->route('receipt.create')->with('success', 'Data has been saved.');
     }
 
@@ -1651,7 +1885,7 @@ class ReceiptController extends Controller
 
         // $tt_codes = json_decode($tt_code, true);
 
-        return view('receipt.edit')->with(['datas'=>Departemen::all(), 'tts'=>TT::where(['is_delete'=>'0'])->get(), 'pims'=>PIM::where(['is_delete'=>'0'])->get(),'warehouse'=>Warehouse::where(['is_delete'=>'0'])->get(), 'company'=>Company::all(), 'itemgroup'=>Itemgroup::where('is_delete','0')->get(), 'provinces'=>IndProv::all(), 'objective'=>Objective::where('is_delete','0')->get(), 'measurement'=>Measurement::where('is_delete','0')->get(), 'receipts'=>ReceiptLog::where(['is_delete'=>'0'])->get(), 'receipt'=>ReceiptLog::find($id), 'remarks'=>Remarks::where('is_delete','0')->get(), 'po_id'=>$po_id, 'po'=>$po[0], 'prm'=>$prm[0], 'vendor_id'=>$vendor_id[0], 'vendor_name'=>$vendor_name[0], 'tpk_id'=>$tpk_id[0], 'tpkname'=>$tpkname, 'kph'=>$kph, 'doc'=>$doc[0], 'measu'=>$measu[0], 'npwp'=>$npwp[0], 'incoterms'=>$incoterms[0], 'noparcel'=>$noparcel[0], 'notransport'=>$notransport[0], 'speciesid'=>$speciesid, 'species'=>$species[0], 'certificateid'=>$certificate_id[0], 'certificate'=>$certificate[0], 'tt_id'=>$tt_id[0], 'tt_code'=>$tt_code[0],'tt_no'=>$tt_no[0], 'skskb_no'=>$skskb_no[0], 'skskb_qty'=>$skskb_qty[0], 'skskb_m3'=>$skskb_m3[0], 'name_beneficiary'=>$name_beneficiary[0], 'address_beneficiary'=>$address_beneficiary[0], 'contactperson_beneficiary'=>$contactperson_beneficiary, 'name_province'=>$name_province[0], 'name_city'=>$name_city[0], 'rvendors'=>ReceiptLogVendor::all(), 'rdocument'=>ReceiptLogDocument::all(), 'rgrader'=>receiptgrader::all(), 'rgraderout'=>ReceiptLogGraderOut::all(), 'rgraderin'=>ReceiptLogGraderIn::all(), 'taxs'=>Tax::all(),'pim'=>$pim, 'no_pim'=>$no_pim, 'invoicing'=> ReceiptLogInvoicing::all() ]);
+        return view('receipt.edit')->with(['datas'=>Departemen::all(), 'tts'=>TT::where(['is_delete'=>'0'])->get(), 'pims'=>PIM::where(['is_delete'=>'0'])->get(),'warehouse'=>Warehouse::where(['is_delete'=>'0'])->get(), 'company'=>Company::all(), 'itemgroup'=>Itemgroup::where('is_delete','0')->get(), 'provinces'=>IndProv::all(), 'objective'=>Objective::where('is_delete','0')->get(), 'measurement'=>Measurement::where('is_delete','0')->get(), 'receipts'=>ReceiptLog::where(['is_delete'=>'0'])->orderBy('id', 'desc')->get(), 'receipt'=>ReceiptLog::find($id), 'remarks'=>Remarks::where('is_delete','0')->get(), 'po_id'=>$po_id, 'po'=>$po[0], 'prm'=>$prm[0], 'vendor_id'=>$vendor_id[0], 'vendor_name'=>$vendor_name[0], 'tpk_id'=>$tpk_id[0], 'tpkname'=>$tpkname, 'kph'=>$kph, 'doc'=>$doc[0], 'measu'=>$measu[0], 'npwp'=>$npwp[0], 'incoterms'=>$incoterms[0], 'noparcel'=>$noparcel[0], 'notransport'=>$notransport[0], 'speciesid'=>$speciesid, 'species'=>$species[0], 'certificateid'=>$certificate_id[0], 'certificate'=>$certificate[0], 'tt_id'=>$tt_id[0], 'tt_code'=>$tt_code[0],'tt_no'=>$tt_no[0], 'skskb_no'=>$skskb_no[0], 'skskb_qty'=>$skskb_qty[0], 'skskb_m3'=>$skskb_m3[0], 'name_beneficiary'=>$name_beneficiary[0], 'address_beneficiary'=>$address_beneficiary[0], 'contactperson_beneficiary'=>$contactperson_beneficiary, 'name_province'=>$name_province[0], 'name_city'=>$name_city[0], 'rvendors'=>ReceiptLogVendor::all(), 'rdocument'=>ReceiptLogDocument::all(), 'rgrader'=>receiptgrader::all(), 'rgraderout'=>ReceiptLogGraderOut::all(), 'rgraderin'=>ReceiptLogGraderIn::all(), 'taxs'=>Tax::all(),'pim'=>$pim, 'no_pim'=>$no_pim, 'invoicing'=> ReceiptLogInvoicing::all() ]);
     }
 
     public function updategeneral(Request $request, $id)
@@ -1666,6 +1900,7 @@ class ReceiptController extends Controller
 
         $r = ReceiptLog::find($id);
         $r->code = $request->get('code');
+        $r->tt_id = $request->get('tt_id');
         $r->pimid = $request->get('pimid');
         $r->status = $request->get('status');
         $r->itemgroup_id = $request->get('itemgroup_id');
@@ -1795,6 +2030,14 @@ class ReceiptController extends Controller
     {
         $g = receiptgrader::find($id);
         $g->delete();
+        if($g->delete())
+        {
+            //maka hapus juga relasi hph yg punya id_receiptlog tersebut
+            $r_hph = ReceiptHPH::where('id_receiptlog',$id)->get();
+            $r_hph->delete();
+
+
+        }
         return back()->with('success', 'Data has been deleted');
     }
 }

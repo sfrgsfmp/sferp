@@ -653,6 +653,7 @@
                                             <tr>
                                                 <th data-toggle="true"> Number</th>
                                                 <th> Apply Date </th>
+                                                <th> TT</th>
                                                 <th> PIM</th>
                                                 <th> PIM No </th>
                                                 <th> Parcel </th>
@@ -684,11 +685,12 @@
                                         <tbody>
                                             @foreach($receipts as $r)
                                             <tr>
-                                            <td> {{ $r->code}}</td>
+                                                <td> {{ $r->code}}</td>
                                                 <td> {{ $r->applydate }}</td>
-                                                <td> {{ implode(',', $r->pim()->get()->pluck('code_pim')->toArray()) }} </td>
-                                                <td> {{ implode(',', $r->pim()->get()->pluck('pimno')->toArray()) }} </td>
-                                                <td> {{ implode(',', $r->pim()->get()->pluck('noparcel')->toArray()) }}</td>
+                                                <td> {{ implode(',', $r->tts()->get()->pluck('code_tt')->toArray()) }}</td>
+                                                <td> {{ implode(',', $r->pims()->get()->pluck('code_pim')->toArray()) }} </td>
+                                                <td> {{ implode(',', $r->pims()->get()->pluck('pimno')->toArray()) }} </td>
+                                                <td> {{ implode(',', $r->pims()->get()->pluck('noparcel')->toArray()) }}</td>
                                                 <td> {{ $r->status }} </td>
                                                 <td> {{ implode(',', $r->itemgroup()->get()->pluck('itemgroup_name')->toArray()) }} </td>
                                                 <td> {{ $r->division }} </td>
